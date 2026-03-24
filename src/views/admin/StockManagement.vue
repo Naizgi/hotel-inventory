@@ -659,7 +659,7 @@ export default {
 
     const fetchStockMovements = async () => {
       try {
-        const response = await api.get("/api/admin/stock-movements");
+        const response = await api.get("/admin/stock-movements");
         if (response.status == 200) {
           const data = await response.data;
           stockMovements.value = Array.isArray(data) ? data : [];
@@ -671,7 +671,7 @@ export default {
 
     const fetchItemDetails = async () => {
       try {
-        const response = await api.get("/api/admin/items");
+        const response = await api.get("/admin/items");
         if (response.status == 200) {
           const data = await response.data;
           const items = Array.isArray(data) ? data : [];
@@ -728,7 +728,7 @@ export default {
       submitting.value = true;
       try {
         const response = await api.put(
-          `/api/admin/stock-requests/${selectedRequest.value.id}/approve`,
+          `/admin/stock-requests/${selectedRequest.value.id}/approve`,
           {
             admin_response: adminResponse.value,
             transfer_quantity: transferQuantity.value,
@@ -763,7 +763,7 @@ export default {
       submitting.value = true;
       try {
         const response = await api.put(
-          `/api/admin/stock-requests/${selectedRequest.value.id}/reject`,
+          `/admin/stock-requests/${selectedRequest.value.id}/reject`,
           {
             admin_response: rejectReason.value,
           },
@@ -794,7 +794,7 @@ export default {
 
       submitting.value = true;
       try {
-        const response = await api.post(`/api/admin/admin-inventory/adjust`, {
+        const response = await api.post(`/admin/admin-inventory/adjust`, {
           item_id: selectedInventoryItem.value.item_id,
           type: adjustmentType.value,
           quantity: adjustmentQuantity.value,

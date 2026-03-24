@@ -599,7 +599,7 @@ export default {
       submitting.value = true;
       try {
         const response = await api.put(
-          `/api/admin/stock-requests/${selectedRequest.value.id}/approve`,
+          `/admin/stock-requests/${selectedRequest.value.id}/approve`,
           {
             admin_response: adminResponse.value,
             transfer_quantity: transferQuantity.value,
@@ -637,7 +637,7 @@ export default {
       submitting.value = true;
       try {
         const response = await api.put(
-          `/api/admin/stock-requests/${selectedRequest.value.id}/reject`,
+          `/admin/stock-requests/${selectedRequest.value.id}/reject`,
           {
             admin_response: rejectReason.value,
           },
