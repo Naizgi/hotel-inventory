@@ -263,6 +263,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '../../services/api';
 
 export default {
   name: 'BaristaDashboard',
@@ -342,9 +343,7 @@ export default {
         const token = localStorage.getItem('authToken')
         
         // Fetch inventory
-        const inventoryResponse = await fetch('/api/barista/inventory', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const inventoryResponse = await api.get('/barista/inventory')
         
         if (inventoryResponse.status === 401 || inventoryResponse.status === 403) {
           showToast('Session expired. Please login again.', 'error')
@@ -354,43 +353,37 @@ export default {
           return
         }
         
-        if (inventoryResponse.ok) {
-          const data = await inventoryResponse.json()
+        if (inventoryResponse.status==200) {
+          const data = await inventoryResponse.data
           drinks.value = Array.isArray(data) ? data : (data.items || data)
           stats.value.totalRemainingCoupons = drinks.value.reduce((sum, d) => sum + (d.remaining || 0), 0)
         }
         
         // Fetch distributions
-        const distResponse = await fetch('/api/barista/distributions', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const distResponse = await api.get('/barista/distributions')
         
-        if (distResponse.ok) {
-          const data = await distResponse.json()
+        if (distResponse.status==200) {
+          const data = await distResponse.data
           const distributions = Array.isArray(data) ? data : (data.distributions || data)
           recentDistributions.value = distributions.slice(0, 10)
           stats.value.totalDistributedToday = recentDistributions.value.reduce((sum, d) => sum + (d.quantity || 0), 0)
         }
         
         // Fetch stock requests
-        const requestsResponse = await fetch('/api/barista/stock-requests', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const requestsResponse = await api.get('/barista/stock-requests')
         
-        if (requestsResponse.ok) {
-          const data = await requestsResponse.json()
+        if (requestsResponse.status==200) {
+          const data = await requestsResponse.data
           const requests = Array.isArray(data) ? data : (data.requests || data)
           stockRequests.value = requests.filter(r => r.status === 'pending')
           stats.value.pendingRequests = stockRequests.value.length
         }
         
         // Fetch waiters (users with role cashier or barista)
-        const usersResponse = await fetch('/api/admin/users', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const usersResponse = await api.get('/admin/users')
         
-        if (usersResponse.ok) {
-          const data = await usersResponse.json()
+        if (usersResponse.status==200) {
+          const data = await usersResponse.data
           const users = Array.isArray(data) ? data : (data.users || data)
           waiters.value = users.filter(u => u.role === 'cashier' || u.role === 'barista')
         }
@@ -469,16 +462,12 @@ export default {
       isDistributing.value = true
       try {
         const token = localStorage.getItem('authToken')
-        const response = await fetch('/api/barista/distribute', {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({
+        const response = await api.post('/barista/distribute', {
             item_id: selectedDrink.value.id,
             quantity: distributeQuantity.value,
             assigned_to: assignedTo.value,
             notes: notes.value
           })
-        })
         
         if (response.status === 401 || response.status === 403) {
           showToast('Session expired. Please login again.', 'error')
@@ -488,11 +477,11 @@ export default {
           return
         }
         
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error(`HTTP ${response.status}`)
         }
         
-        const result = await response.json()
+        const result = await response.data
         
         // Update local data
         selectedDrink.value.remaining -= distributeQuantity.value

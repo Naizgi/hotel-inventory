@@ -342,6 +342,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '../../services/api';
 
 export default {
   name: 'CashierDashboard',
@@ -433,9 +434,7 @@ export default {
         const token = localStorage.getItem('authToken')
         
         // Fetch today's stats
-        const statsResponse = await fetch('/api/cashier/daily-coupons', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const statsResponse = await api.get('/cashier/daily-coupons')
         
         if (statsResponse.status === 401 || statsResponse.status === 403) {
           showToast('Session expired. Please login again.', 'error')
@@ -445,20 +444,18 @@ export default {
           return
         }
         
-        if (statsResponse.ok) {
-          const data = await statsResponse.json()
+        if (statsResponse.status==200) {
+          const data = await statsResponse.data
           const dailyCoupons = Array.isArray(data) ? data : (data.daily_coupons || data)
           stats.value.couponsUsedToday = dailyCoupons.reduce((sum, d) => sum + (d.sold_quantity || 0), 0)
           stats.value.openingCoupons = dailyCoupons.reduce((sum, d) => sum + (d.initial_coupon || 0), 0)
         }
         
         // Fetch recent sales
-        const salesResponse = await fetch('/api/cashier/sales', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const salesResponse = await api.get('/cashier/sales')
         
-        if (salesResponse.ok) {
-          const data = await salesResponse.json()
+        if (salesResponse.status==200) {
+          const data = await salesResponse.data
           const sales = Array.isArray(data) ? data : (data.sales || data)
           recentSales.value = sales.slice(0, 10)
           
@@ -471,12 +468,10 @@ export default {
         }
         
         // Fetch menu items
-        const itemsResponse = await fetch('/api/admin/items', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const itemsResponse = await api.get('/admin/items')
         
-        if (itemsResponse.ok) {
-          const data = await itemsResponse.json()
+        if (itemsResponse.status==200) {
+          const data = await itemsResponse.data
           menuItems.value = Array.isArray(data) ? data : (data.items || data)
         }
         
@@ -620,11 +615,7 @@ export default {
           notes: saleNotes.value
         }
         
-        const response = await fetch('/api/cashier/sales', {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(saleData)
-        })
+        const response = await api.post('/cashier/sales',saleData)
         
         if (response.status === 401 || response.status === 403) {
           showToast('Session expired. Please login again.', 'error')
@@ -634,11 +625,11 @@ export default {
           return
         }
         
-        if (!response.ok) {
+        if (!response.status==200) {
           throw new Error(`HTTP ${response.status}`)
         }
         
-        const result = await response.json()
+        const result = await response.data
         
         showToast('Sale completed successfully!', 'success')
         closeSaleModal()
@@ -678,14 +669,10 @@ export default {
         const token = localStorage.getItem('authToken')
         const remainingCoupons = (stats.value.openingCoupons || 0) - (stats.value.couponsUsedToday || 0)
         
-        const response = await fetch('/api/cashier/end-of-day', {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({
+        const response = await api.post('/cashier/end-of-day', {
             remaining_coupons: remainingCoupons,
             notes: eodNotes.value
           })
-        })
         
         if (response.status === 401 || response.status === 403) {
           showToast('Session expired. Please login again.', 'error')
@@ -695,7 +682,7 @@ export default {
           return
         }
         
-        if (!response.ok) {
+        if (!response.status==200) {
           throw new Error(`HTTP ${response.status}`)
         }
         

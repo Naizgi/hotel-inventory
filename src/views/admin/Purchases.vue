@@ -264,6 +264,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
+import api from '../../services/api'
 
 export default {
   name: 'AdminPurchases',
@@ -380,11 +381,7 @@ export default {
       isLoading.value = true
       try {
         const token = localStorage.getItem('authToken')
-        const response = await fetch('/api/admin/purchases', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
+        const response = await api.get('/admin/purchases' )
         
         if (response.status === 401 || response.status === 403) {
           toast.error('Session expired. Please login again.')
@@ -394,11 +391,11 @@ export default {
           return
         }
         
-        if (!response.ok) {
+        if (!response.status==200) {
           throw new Error(`HTTP ${response.status}`)
         }
         
-        const data = await response.json()
+        const data = await response.data
         purchases.value = Array.isArray(data) ? data : (data.purchases || data.data || [])
       } catch (error) {
         console.error('Error fetching purchases:', error)
@@ -417,17 +414,13 @@ export default {
     const fetchItems = async () => {
       try {
         const token = localStorage.getItem('authToken')
-        const response = await fetch('/api/admin/items', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
+        const response = await api.get('/admin/items')
         
-        if (!response.ok) {
+        if (!response.status==200) {
           throw new Error(`HTTP ${response.status}`)
         }
         
-        const data = await response.json()
+        const data = await response.data
         items.value = Array.isArray(data) ? data : (data.items || data.data || [])
       } catch (error) {
         console.error('Error fetching items:', error)
@@ -487,29 +480,21 @@ export default {
         const token = localStorage.getItem('authToken')
         
         if (isEditing.value && selectedPurchase.value) {
-          const response = await fetch(`/api/admin/purchases/${selectedPurchase.value.id}`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(purchaseData)
-          })
+          const response = await api.put(`/admin/purchases/${selectedPurchase.value.id}`,purchaseData)
           
-          if (!response.ok) {
+          if (!response.status==200) {
             throw new Error(`HTTP ${response.status}`)
           }
           
           toast.success('Purchase updated successfully')
         } else {
-          const response = await fetch('/api/admin/purchases', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(purchaseData)
-          })
+          const response = await api.post('/admin/purchases', purchaseData)
           
-          if (!response.ok) {
+          if (!response.status==200) {
             throw new Error(`HTTP ${response.status}`)
           }
           
-          const newPurchase = await response.json()
+          const newPurchase = await response.data
           purchases.value.unshift(newPurchase)
           toast.success('Purchase recorded successfully')
         }

@@ -198,6 +198,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../../store/auth'
 import Chart from 'chart.js/auto'
+import api from '../../services/api';
 
 export default {
   name: 'DailyCoupons',
@@ -291,9 +292,7 @@ export default {
         }
         
         console.log('Fetching daily coupons...')
-        const response = await fetch('/api/barista/inventory', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const response = await api.get('/barista/inventory')
         
         if (response.status === 401 || response.status === 403) {
           error.value = 'Authentication failed. Please login again.'
@@ -301,8 +300,8 @@ export default {
           return
         }
         
-        if (response.ok) {
-          const data = await response.json()
+        if (response.status === 200) {
+          const data = await response.data
           console.log('Daily coupons data received:', data)
           
           if (Array.isArray(data) && data.length > 0) {
@@ -339,12 +338,10 @@ export default {
     const fetchWaiters = async () => {
       try {
         const token = localStorage.getItem('authToken')
-        const response = await fetch('/api/barista/waiters', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const response = await api.get('/barista/waiters')
         
-        if (response.ok) {
-          const data = await response.json()
+        if (response.status === 200) {
+          const data = await response.data
           waiters.value = Array.isArray(data) ? data : []
         } else {
           console.error('Failed to fetch waiters:', response.status)
@@ -424,24 +421,21 @@ export default {
       isDistributing.value = true
       try {
         const token = localStorage.getItem('authToken')
-        const response = await fetch('/api/barista/distribute', {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({
-            item_id: selectedItem.value.id,
-            quantity: distributeQuantity.value,
+        const response = await api.post('/barista/distribute', {
+          item_id: selectedItem.value.id,
+          quantity: distributeQuantity.value,
             assigned_to: distributeTo.value,
             notes: ''
           })
-        })
+      
         
         if (response.status === 401 || response.status === 403) {
           alert('Session expired. Please login again.')
           return
         }
         
-        if (response.ok) {
-          const result = await response.json()
+        if (response.status === 200) {
+          const result = await response.data
           
           // Update local data
           selectedItem.value.remaining -= distributeQuantity.value

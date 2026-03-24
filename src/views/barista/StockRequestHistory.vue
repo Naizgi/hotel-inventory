@@ -171,7 +171,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-
+import api from '../../services/api';
 export default {
   name: 'BaristaStockRequestHistory',
   setup() {
@@ -269,11 +269,9 @@ export default {
     
     const fetchRequests = async () => {
       try {
-        const response = await fetch('/api/barista/stock-requests', {
-          headers: getAuthHeaders()
-        })
-        if (response.ok) {
-          const data = await response.json()
+        const response = await api.get('/barista/stock-requests')
+        if (response.status ==200) {
+          const data = await response.data
           requests.value = Array.isArray(data) ? data : []
         }
       } catch (error) {
@@ -284,11 +282,9 @@ export default {
     
     const fetchItemDetails = async () => {
       try {
-        const response = await fetch('/api/barista/items', {
-          headers: getAuthHeaders()
-        })
-        if (response.ok) {
-          const data = await response.json()
+        const response = await api.get('/barista/items')
+        if (response.status === 200) {
+          const data = await response.data
           const items = Array.isArray(data) ? data : []
           items.forEach(item => {
             itemDetails.value[item.id] = {
@@ -322,17 +318,14 @@ export default {
       
       cancelling.value = true
       try {
-        const response = await fetch(`/api/barista/stock-requests/${requestToCancel.value.id}`, {
-          method: 'DELETE',
-          headers: getAuthHeaders()
-        })
+        const response = await api.delete(`/barista/stock-requests/${requestToCancel.value.id}`)
         
-        if (response.ok) {
+        if (response.status === 200) {
           showToastMessage(`Request for ${requestToCancel.value.item_name} cancelled successfully`)
           closeCancelModal()
           fetchRequests()
         } else {
-          const error = await response.json()
+          const error = await response.data
           showToastMessage(error.detail || 'Failed to cancel request', 'error')
         }
       } catch (error) {

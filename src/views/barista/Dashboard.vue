@@ -126,7 +126,7 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
-
+import api from '../../services/api';
 export default {
   name: 'BaristaDashboard',
   setup() {
@@ -190,11 +190,9 @@ export default {
 
     const fetchInventory = async () => {
       try {
-        const response = await fetch('/api/barista/inventory', {
-          headers: getAuthHeaders()
-        })
-        if (response.ok) {
-          const data = await response.json()
+        const response = await api.get('/barista/inventory')
+        if (response.status === 200) {
+          const data = await response.data
           inventory.value = Array.isArray(data) ? data : []
         }
       } catch (error) {
@@ -204,19 +202,16 @@ export default {
 
     const fetchDistributions = async () => {
       try {
-        const response = await fetch('/api/barista/distributions', {
-          headers: getAuthHeaders()
-        })
-        if (response.ok) {
-          const data = await response.json()
+        const response = await api.get('/barista/distributions')
+         
+        if (response.status === 200) {
+          const data = await response.data
           distributions.value = Array.isArray(data) ? data : []
           
           // Get item details for icons
-          const itemsResponse = await fetch('/api/barista/items', {
-            headers: getAuthHeaders()
-          })
-          if (itemsResponse.ok) {
-            const items = await itemsResponse.json()
+          const itemsResponse = await api.get('/barista/items')
+          if (itemsResponse.status === 200) {
+            const items = await itemsResponse.data
             items.forEach(item => {
               itemDetails.value[item.id] = {
                 icon: item.icon,
@@ -232,11 +227,9 @@ export default {
 
     const fetchStockRequests = async () => {
       try {
-        const response = await fetch('/api/barista/stock-requests', {
-          headers: getAuthHeaders()
-        })
-        if (response.ok) {
-          const data = await response.json()
+        const response = await api.get('/barista/stock-requests')
+        if (response.status === 200) {
+          const data = await response.data
           stockRequests.value = Array.isArray(data) ? data : []
         }
       } catch (error) {

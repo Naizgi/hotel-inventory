@@ -183,7 +183,7 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
-
+import api from '../../services/api';
 export default {
   name: 'BaristaInventory',
   setup() {
@@ -293,14 +293,12 @@ export default {
     }
     
     console.log('Fetching inventory from /api/barista/inventory...')
-    const response = await fetch('/api/barista/inventory', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
+    const response = await api.get('/barista/inventory')
     
     console.log('Inventory response status:', response.status)
     
-    if (response.ok) {
-      const data = await response.json()
+    if (response.status === 200) {
+      const data = await response.data
       console.log('Inventory data received:', data)
       
       // Handle the data - it should already be an array

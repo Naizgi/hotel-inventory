@@ -331,9 +331,7 @@ export default {
         const token = localStorage.getItem('authToken')
         if (!token) return
 
-        const response = await fetch('/api/barista/inventory', {
-          headers: getAuthHeaders()
-        })
+        const response = await api.get('/barista/inventory')
 
         if (response.ok) {
           const data = await response.json()

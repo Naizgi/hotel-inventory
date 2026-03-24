@@ -215,7 +215,7 @@
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-
+import api from '../../services/api';
 export default {
   name: 'CashierPOS',
   setup() {
@@ -321,9 +321,7 @@ export default {
           return
         }
         
-        const response = await fetch('/api/cashier/items', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const response = await api.get('/cashier/items')
         
         if (response.status === 401) {
           showSuccessToast('Session expired. Please login again.', 'error')
@@ -331,8 +329,8 @@ export default {
           return
         }
         
-        if (response.ok) {
-          const data = await response.json()
+        if (response.status==200) {
+          const data = await response.data
           items.value = Array.isArray(data) ? data : (data.items || data)
           
           // Extract unique categories
@@ -433,14 +431,7 @@ export default {
         
         console.log('Sending sale data:', saleData)
         
-        const response = await fetch('/api/cashier/sales', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(saleData)
-        })
+        const response = await api.post('/cashier/sales', saleData)
         
         if (response.status === 401) {
           showSuccessToast('Session expired. Please login again.', 'error')
@@ -451,11 +442,11 @@ export default {
         // Parse the response
         let result
         try {
-          result = await response.json()
+          result = await response.data
           console.log('Server response:', result)
         } catch (e) {
           console.error('Failed to parse response:', e)
-          const text = await response.text()
+          const text = await response.error
           console.error('Raw response:', text)
           showSuccessToast('Server returned invalid response', 'error')
           return
@@ -467,7 +458,7 @@ export default {
           return
         }
         
-        if (response.ok || result.success === true) {
+        if (response.status==200 || result.success === true) {
           // Update local item quantities
           for (const cartItem of cart.value) {
             const item = items.value.find(i => i.id === cartItem.id)

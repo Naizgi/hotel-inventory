@@ -249,7 +249,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
-
+import api from '../../services/api';
 export default {
   name: 'AdminItems',
   setup() {
@@ -330,11 +330,7 @@ export default {
       isLoading.value = true
       try {
         const token = localStorage.getItem('authToken')
-        const response = await fetch('/api/admin/items', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
+        const response = await api.get('/admin/items')
         
         if (response.status === 401 || response.status === 403) {
           toast.error('Session expired. Please login again.')
@@ -344,11 +340,11 @@ export default {
           return
         }
         
-        if (!response.ok) {
+        if (!response.status==200) {
           throw new Error(`HTTP ${response.status}`)
         }
         
-        const data = await response.json()
+        const data = await response.data
         items.value = Array.isArray(data) ? data : (data.items || data.data || [])
       } catch (error) {
         console.error('Error fetching items:', error)
@@ -407,8 +403,8 @@ export default {
       try {
         const token = localStorage.getItem('authToken')
         const url = isEditing.value 
-          ? `/api/admin/items/${formData.value.id}` 
-          : '/api/admin/items'
+          ? `/admin/items/${formData.value.id}` 
+          : '/admin/items'
         
         const method = isEditing.value ? 'PUT' : 'POST'
         
@@ -422,11 +418,11 @@ export default {
           status: formData.value.status
         }
         
-        const response = await fetch(url, {
-          method,
-          headers: getAuthHeaders(),
-          body: JSON.stringify(itemData)
-        })
+        const response = await api({
+  method: method,
+  url: url,
+  data: itemData
+})
         
         if (response.status === 401 || response.status === 403) {
           toast.error('Session expired. Please login again.')
@@ -436,12 +432,12 @@ export default {
           return
         }
         
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
+        if (!response.status==200) {
+          const errorData = await response.data
           throw new Error(errorData.detail || `HTTP ${response.status}`)
         }
         
-        const responseData = await response.json()
+        const responseData = await response.data
         
         if (isEditing.value) {
           const index = items.value.findIndex(i => i.id === formData.value.id)
@@ -478,12 +474,7 @@ export default {
       isDeleting.value = true
       try {
         const token = localStorage.getItem('authToken')
-        const response = await fetch(`/api/admin/items/${itemToDelete.value.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
+        const response = await api.delete(`/admin/items/${itemToDelete.value.id}`)
         
         if (response.status === 401 || response.status === 403) {
           toast.error('Session expired. Please login again.')
@@ -493,8 +484,8 @@ export default {
           return
         }
         
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
+        if (!response.status==200) {
+          const errorData = await response.data
           throw new Error(errorData.detail || `HTTP ${response.status}`)
         }
         

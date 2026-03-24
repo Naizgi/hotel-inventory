@@ -310,7 +310,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-
+import api from '../../services/api';
 export default {
   name: 'BaristaRequestStock',
   setup() {
@@ -525,12 +525,10 @@ export default {
           return
         }
         
-        console.log('Fetching items from /api/barista/items...')
+        console.log('Fetching items from /barista/items...')
         
         // First fetch all items from items table
-        const itemsResponse = await fetch('/api/barista/items', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const itemsResponse = await api.get('/barista/items')
         
         if (itemsResponse.status === 401 || itemsResponse.status === 403) {
           showToast('Session expired. Please login again.', 'error')
@@ -538,20 +536,18 @@ export default {
           return
         }
         
-        if (itemsResponse.ok) {
-          const itemsData = await itemsResponse.json()
+        if (itemsResponse.status === 200) {
+          const itemsData = await itemsResponse.data
           console.log('Items data received:', itemsData)
           const itemsList = Array.isArray(itemsData) ? itemsData : (itemsData.items || itemsData)
           
           // Now fetch current inventory to get remaining quantities
-          console.log('Fetching inventory from /api/barista/inventory...')
-          const inventoryResponse = await fetch('/api/barista/inventory', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          })
+          console.log('Fetching inventory from /barista/inventory...')
+          const inventoryResponse = await api.get('/barista/inventory')
           
           let inventoryMap = {}
-          if (inventoryResponse.ok) {
-            const inventoryData = await inventoryResponse.json()
+          if (inventoryResponse.status === 200) {
+            const inventoryData = await inventoryResponse.data
             console.log('Inventory data received:', inventoryData)
             const inventoryList = Array.isArray(inventoryData) ? inventoryData : (inventoryData.items || inventoryData)
             
@@ -585,13 +581,11 @@ export default {
         }
         
         // Fetch stock requests from barista/stock-requests
-        console.log('Fetching stock requests from /api/barista/stock-requests...')
-        const requestsResponse = await fetch('/api/barista/stock-requests', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        console.log('Fetching stock requests from /barista/stock-requests...')
+        const requestsResponse = await api.get('/barista/stock-requests')
         
-        if (requestsResponse.ok) {
-          const data = await requestsResponse.json()
+        if (requestsResponse.status === 200) {
+          const data = await requestsResponse.data
           console.log('Stock requests received:', data)
           const requests = Array.isArray(data) ? data : (data.requests || data)
           recentRequests.value = requests.slice(0, 10).map(req => {
@@ -639,17 +633,13 @@ export default {
       isSubmitting.value = true
       try {
         const token = localStorage.getItem('authToken')
-        const response = await fetch('/api/barista/stock-requests', {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({
+        const response = await api.post('/barista/stock-requests', {
             item_id: parseInt(requestForm.value.item_id),
             requested_quantity: requestForm.value.quantity,
             priority: requestForm.value.priority,
             reason: requestForm.value.reason,
             notes: requestForm.value.notes
           })
-        })
         
         if (response.status === 401 || response.status === 403) {
           showToast('Session expired. Please login again.', 'error')
@@ -659,12 +649,12 @@ export default {
           return
         }
         
-        if (!response.ok) {
-          const error = await response.json()
+        if (!response.status==200) {
+          const error = await response.error
           throw new Error(error.detail || `HTTP ${response.status}`)
         }
         
-        const result = await response.json()
+        const result = await response.data
         
         // Add to recent requests
         const item = selectedItem.value
@@ -733,10 +723,7 @@ export default {
       
       try {
         const token = localStorage.getItem('authToken')
-        const response = await fetch(`/api/barista/stock-requests/${requestToCancel.value.id}`, {
-          method: 'DELETE',
-          headers: getAuthHeaders()
-        })
+        const response = await api.delete(`/barista/stock-requests/${requestToCancel.value.id}`)
         
         if (response.status === 401 || response.status === 403) {
           showToast('Session expired. Please login again.', 'error')
@@ -746,8 +733,8 @@ export default {
           return
         }
         
-        if (!response.ok) {
-          const error = await response.json()
+        if (!response.status==200) {
+          const error = await response.error
           throw new Error(error.detail || `HTTP ${response.status}`)
         }
         
@@ -773,12 +760,10 @@ export default {
       isRefreshing.value = true
       try {
         const token = localStorage.getItem('authToken')
-        const response = await fetch('/api/barista/stock-requests', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const response = await api.get('/barista/stock-requests')
         
-        if (response.ok) {
-          const data = await response.json()
+        if (response.status==200) {
+          const data = await response.data
           const requests = Array.isArray(data) ? data : (data.requests || data)
           recentRequests.value = requests.slice(0, 10).map(req => {
             const item = items.value.find(i => i.id === req.item_id)

@@ -178,9 +178,7 @@ export default {
         }
         
         console.log('Fetching notifications...')
-        const response = await api.get('/notifications/', {
-          headers: getAuthHeaders()
-        })
+        const response = await api.get('/notifications/')
         
         console.log('Response status:', response.status)
         
@@ -191,8 +189,8 @@ export default {
           return
         }
         
-        if (response.ok) {
-          const data = await response.json()
+        if (response.status==200) {
+          const data = await response.data
           console.log('Notifications data:', data)
           notifications.value = Array.isArray(data) ? data : (data.notifications || data)
           if (notifications.value.length === 0) {

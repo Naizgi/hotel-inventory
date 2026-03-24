@@ -188,7 +188,7 @@
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-
+import api from '../../services/api';
 export default {
   name: 'CashierRemainingCoupons',
   setup() {
@@ -307,12 +307,10 @@ export default {
         }
         
         // Fetch items
-        const itemsResponse = await fetch('/api/cashier/items', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const itemsResponse = await api.get('/cashier/items')
         
-        if (itemsResponse.ok) {
-          const data = await itemsResponse.json()
+        if (itemsResponse.status == 200) {
+          const data = await itemsResponse.data
           items.value = Array.isArray(data) ? data : (data.items || data)
         } else if (itemsResponse.status === 401) {
           showToast('Session expired. Please login again.', 'error')
@@ -323,12 +321,10 @@ export default {
         }
         
         // Fetch waiters
-        const waitersResponse = await fetch('/api/cashier/waiters', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const waitersResponse = await api.get('/cashier/waiters')
         
-        if (waitersResponse.ok) {
-          const data = await waitersResponse.json()
+        if (waitersResponse.status == 200) {
+          const data = await waitersResponse.data
           const waitersList = Array.isArray(data) ? data : (data.waiters || data)
           waiters.value = waitersList.map(w => ({
             id: w.id,
@@ -341,12 +337,10 @@ export default {
         }
         
         // Fetch distributions
-        const distResponse = await fetch('/api/cashier/distributions', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const distResponse = await api.get('/cashier/distributions')
         
-        if (distResponse.ok) {
-          const data = await distResponse.json()
+        if (distResponse.status == 200) {
+          const data = await distResponse.data
           distributions.value = Array.isArray(data) ? data : (data.distributions || data)
           calculateWaiterStats()
         } else {
@@ -569,22 +563,15 @@ export default {
             used_quantity: newUsedQuantity
           }
           
-          const response = await fetch(`/api/cashier/distributions/${dist.id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(requestBody)
-          })
+          const response = await api.put(`/cashier/distributions/${dist.id}`, requestBody)
           
-          if (!response.ok) {
-            const errorText = await response.text()
+          if (!response.status ==200) {
+            const errorText = await response.data
             console.error('API Error:', response.status, errorText)
             throw new Error(`HTTP ${response.status}: ${errorText}`)
           }
           
-          updatePromises.push(response.json())
+          updatePromises.push(response.data)
           
           // Update local distribution data
           dist.used_quantity = newUsedQuantity

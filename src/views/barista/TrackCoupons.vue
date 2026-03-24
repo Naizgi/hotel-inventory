@@ -285,6 +285,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '../../services/api';
 
 export default {
   name: 'BaristaTrackCoupons',
@@ -461,9 +462,7 @@ export default {
     }
     
     // Fetch distributions from barista endpoint
-    const response = await fetch('/api/barista/distributions', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
+    const response = await api.get('/barista/distributions')
     
     if (response.status === 401 || response.status === 403) {
       showToast('Session expired. Please login again.', 'error')
@@ -473,11 +472,11 @@ export default {
       return
     }
     
-    if (!response.ok) {
+    if (!response.status==200) {
       throw new Error(`HTTP ${response.status}`)
     }
     
-    const data = await response.json()
+    const data = await response.data
     console.log('Fetched distributions:', data) // Debug log
     
     // Map the data to match the component's expected structure
@@ -569,10 +568,7 @@ export default {
       isUpdating.value = true
       try {
         const token = localStorage.getItem('authToken')
-        const response = await fetch(`/api/barista/distributions/${distribution.id}/use`, {
-          method: 'PUT',
-          headers: getAuthHeaders()
-        })
+        const response = await api.put(`/barista/distributions/${distribution.id}/use`)
         
         if (response.status === 401 || response.status === 403) {
           showToast('Session expired. Please login again.', 'error')
@@ -582,7 +578,7 @@ export default {
           return
         }
         
-        if (!response.ok) {
+        if (!response.status==200) {
           throw new Error(`HTTP ${response.status}`)
         }
         
