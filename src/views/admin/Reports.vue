@@ -327,6 +327,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import Chart from 'chart.js/auto'
+import api from '../../services/api'
 
 export default {
   name: 'AdminReports',
@@ -441,35 +442,27 @@ export default {
         const token = localStorage.getItem('authToken')
         
         // Load daily report
-        const dailyResponse = await fetch(`/api/reports/daily?from_date=${dateFrom.value}&to_date=${dateTo.value}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-        if (dailyResponse.ok) {
-          dailyReportData.value = await dailyResponse.json()
+        const dailyResponse = await api.get(`/reports/daily?from_date=${dateFrom.value}&to_date=${dateTo.value}`)
+        if (dailyResponse.status==200) {
+          dailyReportData.value = await dailyResponse.data
         }
         
         // Load fast moving items
-        const fastResponse = await fetch(`/api/reports/fast-moving?from_date=${dateFrom.value}&to_date=${dateTo.value}&limit=10`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-        if (fastResponse.ok) {
-          fastMovingData.value = await fastResponse.json()
+        const fastResponse = await api.get(`/reports/fast-moving?from_date=${dateFrom.value}&to_date=${dateTo.value}&limit=10`)
+        if (fastResponse.status==200) {
+          fastMovingData.value = await fastResponse.data
         }
         
         // Load slow moving items
-        const slowResponse = await fetch(`/api/reports/slow-moving?from_date=${dateFrom.value}&to_date=${dateTo.value}&threshold_days=7`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-        if (slowResponse.ok) {
-          slowMovingData.value = await slowResponse.json()
+        const slowResponse = await api.get(`/reports/slow-moving?from_date=${dateFrom.value}&to_date=${dateTo.value}&threshold_days=7`)
+        if (slowResponse.status==200) {
+          slowMovingData.value = await slowResponse.data
         }
         
         // Load coupon usage
-        const couponResponse = await fetch(`/api/reports/coupon-usage?from_date=${dateFrom.value}&to_date=${dateTo.value}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-        if (couponResponse.ok) {
-          const data = await couponResponse.json()
+        const couponResponse = await api.get(`/reports/coupon-usage?from_date=${dateFrom.value}&to_date=${dateTo.value}`)
+        if (couponResponse.status==200) {
+          const data = await couponResponse.data
           couponUsageData.value = {
             items: data,
             total_available: data.reduce((sum, i) => sum + i.available, 0),

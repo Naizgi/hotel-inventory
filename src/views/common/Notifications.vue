@@ -71,7 +71,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
-
+import api from '../../services/api';
 export default {
   name: 'Notifications',
   setup() {
@@ -178,7 +178,7 @@ export default {
         }
         
         console.log('Fetching notifications...')
-        const response = await fetch('/api/notifications/', {
+        const response = await api.get('/notifications/', {
           headers: getAuthHeaders()
         })
         

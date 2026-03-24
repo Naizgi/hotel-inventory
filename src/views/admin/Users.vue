@@ -404,7 +404,8 @@
 
     <!-- Password Reset Modal -->
     <div v-if="showPasswordModal" class="modal" @click.self="closePasswordModal">
-      <div class="modal-content small">
+      <form @submit.prevent="saveNewPassword">
+        <div class="modal-content small">
         <div class="modal-header">
           <h2>Reset Password</h2>
           <button class="close-btn" @click="closePasswordModal">&times;</button>
@@ -413,20 +414,21 @@
           <p>Reset password for <strong>{{ selectedUser?.name }}</strong></p>
           <div class="form-group">
             <label>New Password</label>
-            <input type="password" v-model="newPassword" placeholder="Enter new password">
+            <input type="password" v-model="newPassword" placeholder="Enter new password" required>
           </div>
           <div class="form-group">
             <label>Confirm Password</label>
-            <input type="password" v-model="confirmNewPassword" placeholder="Confirm new password">
+            <input type="password" v-model="confirmNewPassword" placeholder="Confirm new password" required>
           </div>
           <div class="modal-actions">
             <button class="btn-secondary" @click="closePasswordModal">Cancel</button>
-            <button class="btn-primary" @click="saveNewPassword" :disabled="resettingPassword">
+            <button class="btn-primary" type="submit" :disabled="resettingPassword">
               {{ resettingPassword ? 'Resetting...' : 'Reset Password' }}
             </button>
           </div>
         </div>
       </div>
+      </form>
     </div>
 
     <!-- Delete Confirmation Modal -->
@@ -448,13 +450,18 @@
         </div>
       </div>
     </div>
+    <!-- Toast Notification -->
+    <!-- <div v-if="toastMessage" class="toast" :class="toastType">
+      <i :class="toastIcon"></i>
+      <span>{{ toastMessage }}</span>
+    </div> -->
   </div>
 </template>
 
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
-
+import api from '../../services/api';
 export default {
   name: 'AdminUsers',
   setup() {
@@ -490,7 +497,9 @@ export default {
     const selectedWaiter = ref(null)
     const userToDelete = ref(null)
     const waiterToDelete = ref(null)
-    
+    // Toast state
+    const toastMessage = ref('')
+    const toastType = ref('success')
     // Form data
     const formData = ref({
       name: '',
@@ -519,6 +528,13 @@ export default {
     const cashierCount = computed(() => users.value.filter(u => u.role === 'cashier').length)
     const baristaCount = computed(() => users.value.filter(u => u.role === 'barista').length)
     
+    // const showToastMessage = (message, type = 'success') => {
+    //   toastMessage.value = message
+    //   toastType.value = type
+    //   setTimeout(() => {
+    //     toastMessage.value = ''
+    //   }, 3000)
+    // }
     const filteredUsers = computed(() => {
       let filtered = [...users.value]
       if (searchQuery.value) {
@@ -580,9 +596,9 @@ export default {
     // Fetch functions
     const fetchUsers = async () => {
       try {
-        const response = await fetch('/api/admin/users', { headers: getAuthHeaders() })
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        const data = await response.json()
+        const response = await api.get('/admin/users')
+        if (response.status !== 200) throw new Error(`HTTP ${response.status}`)
+        const data = await response.data
         users.value = Array.isArray(data) ? data : (data.users || data.data || [])
       } catch (error) {
         console.error('Error fetching users:', error)
@@ -593,9 +609,9 @@ export default {
     
     const fetchWaiters = async () => {
       try {
-        const response = await fetch('/api/cashier/waiters', { headers: getAuthHeaders() })
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        const data = await response.json()
+        const response = await api.get('/cashier/waiters' )
+        if (response.status !== 200) throw new Error(`HTTP ${response.status}`)
+        const data = await response.data
         waiters.value = Array.isArray(data) ? data : (data.waiters || data.data || [])
       } catch (error) {
         console.error('Error fetching waiters:', error)
@@ -701,19 +717,18 @@ export default {
         return
       }
       if (newPassword.value.length < 6) {
+        console.log("password must be at least 6 characters")
+        // showToastMessage('Password must be at least 6 characters', 'error')
         toast.error('Password must be at least 6 characters')
         return
       }
       resettingPassword.value = true
       try {
-        const response = await fetch(`/api/admin/users/${selectedUser.value.id}/password`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ password: newPassword.value })
-        })
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const response = await api.put(`/admin/users/${selectedUser.value.id}/password?new_password=${encodeURIComponent(newPassword.value)}`, { new_password: newPassword.value })
+        if (!(response.status==200)) throw new Error(`HTTP ${response.status}`)
         toast.success('Password reset successfully')
         closePasswordModal()
+        console.log('Password reset response:', await response.data)
       } catch (error) {
         console.error('Error resetting password:', error)
         toast.error('Error resetting password')

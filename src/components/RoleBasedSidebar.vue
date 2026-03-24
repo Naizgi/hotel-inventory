@@ -251,7 +251,7 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
-
+import api from '../services/api'
 export default {
   name: 'BarRestaurantSidebar',
   setup() {
@@ -310,7 +310,7 @@ export default {
         const token = localStorage.getItem('authToken')
         if (!token) return
 
-        const response = await fetch('/api/notifications/unread-count', {
+        const response = await api.get('/notifications/unread-count', {
           headers: getAuthHeaders()
         })
 

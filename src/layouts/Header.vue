@@ -63,6 +63,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
+import api  from '../services/api'
 
 export default {
   name: 'Header',
@@ -156,15 +157,10 @@ export default {
           return
         }
         
-        const response = await fetch('/api/notifications/?limit=5', {
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
-          }
-        })
+        const response = await api.get('/notifications/?limit=5',{limit: 5})
         
-        if (response.ok) {
-          const data = await response.json()
+        if (response.status==200) {
+          const data = await response.data
           notifications.value = Array.isArray(data) ? data : (data.notifications || data)
           if (notifications.value.length === 0) {
             loadDemoNotifications()
