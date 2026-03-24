@@ -53,7 +53,10 @@
     <div class="filters">
       <div class="search-box">
         <i class="fas fa-search"></i>
-        <input v-model="searchQuery" placeholder="Search by item or requester...">
+        <input
+          v-model="searchQuery"
+          placeholder="Search by item or requester..."
+        />
       </div>
       <select v-model="statusFilter" class="filter-select">
         <option value="">All Status</option>
@@ -68,8 +71,18 @@
         <option value="high">High</option>
         <option value="urgent">Urgent</option>
       </select>
-      <input type="date" v-model="fromDate" class="date-input" placeholder="From Date">
-      <input type="date" v-model="toDate" class="date-input" placeholder="To Date">
+      <input
+        type="date"
+        v-model="fromDate"
+        class="date-input"
+        placeholder="From Date"
+      />
+      <input
+        type="date"
+        v-model="toDate"
+        class="date-input"
+        placeholder="To Date"
+      />
     </div>
 
     <!-- Loading State -->
@@ -90,14 +103,18 @@
             <th>Priority</th>
             <th>Reason</th>
             <th>Status</th>
-            <th>Actions</th></tr>
-          </thead>
+            <th>Actions</th>
+          </tr>
+        </thead>
         <tbody>
           <tr v-for="request in filteredRequests" :key="request.id">
             <td>{{ formatDate(request.created_at) }}</td>
             <td>
               <div class="item-info">
-                <div class="item-icon-small" :style="{ background: getItemColor(request.item_id) }">
+                <div
+                  class="item-icon-small"
+                  :style="{ background: getItemColor(request.item_id) }"
+                >
                   <i :class="getItemIcon(request.item_id)"></i>
                 </div>
                 <span>{{ request.item_name }}</span>
@@ -106,22 +123,38 @@
             <td>{{ request.requested_by }}</td>
             <td class="quantity-cell">{{ request.requested_quantity }}</td>
             <td>
-              <span :class="['priority-badge', request.priority]">{{ request.priority }}</span>
+              <span :class="['priority-badge', request.priority]">{{
+                request.priority
+              }}</span>
             </td>
-            <td class="reason-cell">{{ request.reason || '-' }}</td>
+            <td class="reason-cell">{{ request.reason || "-" }}</td>
             <td>
-              <span :class="['status-badge', request.status]">{{ request.status }}</span>
+              <span :class="['status-badge', request.status]">{{
+                request.status
+              }}</span>
             </td>
             <td class="actions-cell">
               <template v-if="request.status === 'pending'">
-                <button class="btn-approve-sm" @click="openApproveModal(request)" title="Approve">
+                <button
+                  class="btn-approve-sm"
+                  @click="openApproveModal(request)"
+                  title="Approve"
+                >
                   <i class="fas fa-check"></i>
                 </button>
-                <button class="btn-reject-sm" @click="openRejectModal(request)" title="Reject">
+                <button
+                  class="btn-reject-sm"
+                  @click="openRejectModal(request)"
+                  title="Reject"
+                >
                   <i class="fas fa-times"></i>
                 </button>
               </template>
-              <button class="btn-icon" @click="viewDetails(request)" title="View Details">
+              <button
+                class="btn-icon"
+                @click="viewDetails(request)"
+                title="View Details"
+              >
                 <i class="fas fa-eye"></i>
               </button>
             </td>
@@ -134,7 +167,11 @@
     </div>
 
     <!-- Approve Modal -->
-    <div v-if="showApproveModal" class="modal-overlay" @click.self="closeModals">
+    <div
+      v-if="showApproveModal"
+      class="modal-overlay"
+      @click.self="closeModals"
+    >
       <div class="modal-content">
         <div class="modal-header">
           <h2>Approve Stock Request</h2>
@@ -142,41 +179,71 @@
         </div>
         <div class="modal-body">
           <div class="selected-item" v-if="selectedRequest">
-            <div class="item-icon" :style="{ background: getItemColor(selectedRequest.item_id) }">
+            <div
+              class="item-icon"
+              :style="{ background: getItemColor(selectedRequest.item_id) }"
+            >
               <i :class="getItemIcon(selectedRequest.item_id)"></i>
             </div>
             <div>
               <div class="item-name">{{ selectedRequest.item_name }}</div>
-              <div class="item-detail">Requested: {{ selectedRequest.requested_quantity }} units</div>
-              <div class="item-detail">Priority: {{ selectedRequest.priority }}</div>
-              <div class="item-detail">Reason: {{ selectedRequest.reason || 'No reason provided' }}</div>
+              <div class="item-detail">
+                Requested: {{ selectedRequest.requested_quantity }} units
+              </div>
+              <div class="item-detail">
+                Priority: {{ selectedRequest.priority }}
+              </div>
+              <div class="item-detail">
+                Reason: {{ selectedRequest.reason || "No reason provided" }}
+              </div>
             </div>
           </div>
 
           <div class="form-group">
             <label>Available Stock</label>
-            <div class="stock-info" :class="getStockClass(selectedRequest?.item_id)">
+            <div
+              class="stock-info"
+              :class="getStockClass(selectedRequest?.item_id)"
+            >
               <i class="fas fa-boxes"></i>
-              <span>{{ getAvailableStock(selectedRequest?.item_id) }} units available</span>
+              <span
+                >{{ getAvailableStock(selectedRequest?.item_id) }} units
+                available</span
+              >
             </div>
           </div>
 
           <div class="form-group">
             <label>Transfer Quantity</label>
-            <input type="number" v-model.number="transferQuantity" 
-                   :max="selectedRequest?.requested_quantity" min="1"
-                   placeholder="Enter quantity to transfer">
-            <small>Maximum allowed: {{ selectedRequest?.requested_quantity }} units</small>
+            <input
+              type="number"
+              v-model.number="transferQuantity"
+              :max="selectedRequest?.requested_quantity"
+              min="1"
+              placeholder="Enter quantity to transfer"
+            />
+            <small
+              >Maximum allowed:
+              {{ selectedRequest?.requested_quantity }} units</small
+            >
           </div>
 
           <div class="form-group">
             <label>Admin Response (Optional)</label>
-            <textarea v-model="adminResponse" rows="3" placeholder="Add a response message..."></textarea>
+            <textarea
+              v-model="adminResponse"
+              rows="3"
+              placeholder="Add a response message..."
+            ></textarea>
           </div>
 
           <div class="modal-actions">
             <button class="btn-secondary" @click="closeModals">Cancel</button>
-            <button class="btn-approve" @click="approveRequest" :disabled="submitting">
+            <button
+              class="btn-approve"
+              @click="approveRequest"
+              :disabled="submitting"
+            >
               <i v-if="submitting" class="fas fa-spinner fa-spin"></i>
               <span v-else>Approve & Transfer</span>
             </button>
@@ -194,23 +261,36 @@
         </div>
         <div class="modal-body">
           <div class="selected-item" v-if="selectedRequest">
-            <div class="item-icon" :style="{ background: getItemColor(selectedRequest.item_id) }">
+            <div
+              class="item-icon"
+              :style="{ background: getItemColor(selectedRequest.item_id) }"
+            >
               <i :class="getItemIcon(selectedRequest.item_id)"></i>
             </div>
             <div>
               <div class="item-name">{{ selectedRequest.item_name }}</div>
-              <div class="item-detail">Requested: {{ selectedRequest.requested_quantity }} units</div>
+              <div class="item-detail">
+                Requested: {{ selectedRequest.requested_quantity }} units
+              </div>
             </div>
           </div>
 
           <div class="form-group">
             <label>Reason for Rejection *</label>
-            <textarea v-model="rejectReason" rows="4" placeholder="Explain why the request is being rejected..."></textarea>
+            <textarea
+              v-model="rejectReason"
+              rows="4"
+              placeholder="Explain why the request is being rejected..."
+            ></textarea>
           </div>
 
           <div class="modal-actions">
             <button class="btn-secondary" @click="closeModals">Cancel</button>
-            <button class="btn-reject" @click="rejectRequest" :disabled="submitting || !rejectReason">
+            <button
+              class="btn-reject"
+              @click="rejectRequest"
+              :disabled="submitting || !rejectReason"
+            >
               <i v-if="submitting" class="fas fa-spinner fa-spin"></i>
               <span v-else>Reject Request</span>
             </button>
@@ -220,7 +300,11 @@
     </div>
 
     <!-- Details Modal -->
-    <div v-if="showDetailsModal" class="modal-overlay" @click.self="closeModals">
+    <div
+      v-if="showDetailsModal"
+      class="modal-overlay"
+      @click.self="closeModals"
+    >
       <div class="modal-content">
         <div class="modal-header">
           <h2>Request Details</h2>
@@ -239,7 +323,10 @@
             <div class="detail-row">
               <label>Item:</label>
               <div class="item-info">
-                <div class="item-icon-small" :style="{ background: getItemColor(selectedRequest.item_id) }">
+                <div
+                  class="item-icon-small"
+                  :style="{ background: getItemColor(selectedRequest.item_id) }"
+                >
                   <i :class="getItemIcon(selectedRequest.item_id)"></i>
                 </div>
                 <span>{{ selectedRequest.item_name }}</span>
@@ -251,19 +338,25 @@
             </div>
             <div class="detail-row">
               <label>Quantity:</label>
-              <span class="quantity-highlight">{{ selectedRequest.requested_quantity }}</span>
+              <span class="quantity-highlight">{{
+                selectedRequest.requested_quantity
+              }}</span>
             </div>
             <div class="detail-row">
               <label>Priority:</label>
-              <span :class="['priority-badge', selectedRequest.priority]">{{ selectedRequest.priority }}</span>
+              <span :class="['priority-badge', selectedRequest.priority]">{{
+                selectedRequest.priority
+              }}</span>
             </div>
             <div class="detail-row">
               <label>Reason:</label>
-              <p>{{ selectedRequest.reason || '-' }}</p>
+              <p>{{ selectedRequest.reason || "-" }}</p>
             </div>
             <div class="detail-row">
               <label>Status:</label>
-              <span :class="['status-badge', selectedRequest.status]">{{ selectedRequest.status }}</span>
+              <span :class="['status-badge', selectedRequest.status]">{{
+                selectedRequest.status
+              }}</span>
             </div>
             <div v-if="selectedRequest.admin_response" class="detail-row">
               <label>Admin Response:</label>
@@ -290,286 +383,300 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
-import { useToast } from 'vue-toastification'
-
+import { ref, computed, onMounted } from "vue";
+import { useToast } from "vue-toastification";
+import api from "../../services/api";
 export default {
-  name: 'StockRequests',
+  name: "StockRequests",
   setup() {
-    const toast = useToast()
-    
+    const toast = useToast();
+
     // State
-    const loading = ref(true)
-    const submitting = ref(false)
-    const searchQuery = ref('')
-    const statusFilter = ref('')
-    const priorityFilter = ref('')
-    const fromDate = ref('')
-    const toDate = ref('')
-    const requests = ref([])
-    const itemDetails = ref({})
-    const adminInventory = ref([])
-    
+    const loading = ref(true);
+    const submitting = ref(false);
+    const searchQuery = ref("");
+    const statusFilter = ref("");
+    const priorityFilter = ref("");
+    const fromDate = ref("");
+    const toDate = ref("");
+    const requests = ref([]);
+    const itemDetails = ref({});
+    const adminInventory = ref([]);
+
     // Modal state
-    const showApproveModal = ref(false)
-    const showRejectModal = ref(false)
-    const showDetailsModal = ref(false)
-    const selectedRequest = ref(null)
-    const transferQuantity = ref(1)
-    const adminResponse = ref('')
-    const rejectReason = ref('')
-    
+    const showApproveModal = ref(false);
+    const showRejectModal = ref(false);
+    const showDetailsModal = ref(false);
+    const selectedRequest = ref(null);
+    const transferQuantity = ref(1);
+    const adminResponse = ref("");
+    const rejectReason = ref("");
+
     // Toast state
-    const toastMessage = ref('')
-    const toastType = ref('success')
-    
+    const toastMessage = ref("");
+    const toastType = ref("success");
+
     const toastIcon = computed(() => {
-      return toastType.value === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'
-    })
-    
-    const pendingCount = computed(() => requests.value.filter(r => r.status === 'pending').length)
-    const approvedCount = computed(() => requests.value.filter(r => r.status === 'approved').length)
-    const rejectedCount = computed(() => requests.value.filter(r => r.status === 'rejected').length)
-    const totalRequests = computed(() => requests.value.length)
-    
+      return toastType.value === "success"
+        ? "fas fa-check-circle"
+        : "fas fa-exclamation-circle";
+    });
+
+    const pendingCount = computed(
+      () => requests.value.filter((r) => r.status === "pending").length,
+    );
+    const approvedCount = computed(
+      () => requests.value.filter((r) => r.status === "approved").length,
+    );
+    const rejectedCount = computed(
+      () => requests.value.filter((r) => r.status === "rejected").length,
+    );
+    const totalRequests = computed(() => requests.value.length);
+
     const filteredRequests = computed(() => {
-      let filtered = requests.value
-      
+      let filtered = requests.value;
+
       if (searchQuery.value) {
-        filtered = filtered.filter(r => 
-          r.item_name?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          r.requested_by?.toLowerCase().includes(searchQuery.value.toLowerCase())
-        )
+        filtered = filtered.filter(
+          (r) =>
+            r.item_name
+              ?.toLowerCase()
+              .includes(searchQuery.value.toLowerCase()) ||
+            r.requested_by
+              ?.toLowerCase()
+              .includes(searchQuery.value.toLowerCase()),
+        );
       }
-      
+
       if (statusFilter.value) {
-        filtered = filtered.filter(r => r.status === statusFilter.value)
+        filtered = filtered.filter((r) => r.status === statusFilter.value);
       }
-      
+
       if (priorityFilter.value) {
-        filtered = filtered.filter(r => r.priority === priorityFilter.value)
+        filtered = filtered.filter((r) => r.priority === priorityFilter.value);
       }
-      
+
       if (fromDate.value) {
-        filtered = filtered.filter(r => r.created_at >= fromDate.value)
+        filtered = filtered.filter((r) => r.created_at >= fromDate.value);
       }
-      
+
       if (toDate.value) {
-        filtered = filtered.filter(r => r.created_at <= toDate.value)
+        filtered = filtered.filter((r) => r.created_at <= toDate.value);
       }
-      
-      return filtered
-    })
-    
+
+      return filtered;
+    });
+
     const getAuthHeaders = () => {
-      const token = localStorage.getItem('authToken')
+      const token = localStorage.getItem("authToken");
       return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    }
-    
-    const showToastMessage = (message, type = 'success') => {
-      toastMessage.value = message
-      toastType.value = type
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+    };
+
+    const showToastMessage = (message, type = "success") => {
+      toastMessage.value = message;
+      toastType.value = type;
       setTimeout(() => {
-        toastMessage.value = ''
-      }, 3000)
-    }
-    
+        toastMessage.value = "";
+      }, 3000);
+    };
+
     const formatDate = (dateTime) => {
-      if (!dateTime) return '-'
-      const date = new Date(dateTime)
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      })
-    }
-    
+      if (!dateTime) return "-";
+      const date = new Date(dateTime);
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    };
+
     const formatDateTime = (dateTime) => {
-      if (!dateTime) return '-'
-      const date = new Date(dateTime)
-      return date.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    }
-    
+      if (!dateTime) return "-";
+      const date = new Date(dateTime);
+      return date.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    };
+
     const getItemColor = (itemId) => {
-      return itemDetails.value[itemId]?.color || '#EFCA71'
-    }
-    
+      return itemDetails.value[itemId]?.color || "#EFCA71";
+    };
+
     const getItemIcon = (itemId) => {
-      return itemDetails.value[itemId]?.icon || 'fas fa-cube'
-    }
-    
+      return itemDetails.value[itemId]?.icon || "fas fa-cube";
+    };
+
     const getAvailableStock = (itemId) => {
-      const item = adminInventory.value.find(i => i.item_id === itemId)
-      return item?.quantity || 0
-    }
-    
+      const item = adminInventory.value.find((i) => i.item_id === itemId);
+      return item?.quantity || 0;
+    };
+
     const getStockClass = (itemId) => {
-      const stock = getAvailableStock(itemId)
-      if (stock <= 10) return 'critical'
-      if (stock <= 30) return 'low'
-      return 'adequate'
-    }
-    
+      const stock = getAvailableStock(itemId);
+      if (stock <= 10) return "critical";
+      if (stock <= 30) return "low";
+      return "adequate";
+    };
+
     const fetchRequests = async () => {
       try {
-        const response = await fetch('/api/admin/stock-requests', {
-          headers: getAuthHeaders()
-        })
-        if (response.ok) {
-          const data = await response.json()
-          requests.value = Array.isArray(data) ? data : []
+        const response = await api.get("/admin/stock-requests");
+        if (response.status == 200) {
+          const data = await response.data;
+          requests.value = Array.isArray(data) ? data : [];
         }
       } catch (error) {
-        console.error('Error fetching requests:', error)
-        showToastMessage('Failed to load requests', 'error')
+        console.error("Error fetching requests:", error);
+        showToastMessage("Failed to load requests", "error");
       }
-    }
-    
+    };
+
     const fetchItemDetails = async () => {
       try {
-        const response = await fetch('/api/admin/items', {
-          headers: getAuthHeaders()
-        })
-        if (response.ok) {
-          const data = await response.json()
-          const items = Array.isArray(data) ? data : []
-          items.forEach(item => {
+        const response = await api.get("/admin/items");
+        if (response.status == 200) {
+          const data = await response.data;
+          const items = Array.isArray(data) ? data : [];
+          items.forEach((item) => {
             itemDetails.value[item.id] = {
               icon: item.icon,
-              color: item.color
-            }
-          })
+              color: item.color,
+            };
+          });
         }
       } catch (error) {
-        console.error('Error fetching item details:', error)
+        console.error("Error fetching item details:", error);
       }
-    }
-    
+    };
+
     const fetchAdminInventory = async () => {
       try {
-        const response = await fetch('/api/admin/admin-inventory', {
-          headers: getAuthHeaders()
-        })
-        if (response.ok) {
-          const data = await response.json()
-          adminInventory.value = Array.isArray(data) ? data : []
+        const response = await api.get("/admin/admin-inventory");
+        if (response.status == 200) {
+          const data = await response.data;
+          adminInventory.value = Array.isArray(data) ? data : [];
         }
       } catch (error) {
-        console.error('Error fetching admin inventory:', error)
+        console.error("Error fetching admin inventory:", error);
       }
-    }
-    
+    };
+
     const refreshRequests = async () => {
-      await Promise.all([fetchRequests(), fetchAdminInventory()])
-      showToastMessage('Requests refreshed')
-    }
-    
+      await Promise.all([fetchRequests(), fetchAdminInventory()]);
+      showToastMessage("Requests refreshed");
+    };
+
     const openApproveModal = (request) => {
-      selectedRequest.value = request
-      transferQuantity.value = request.requested_quantity
-      adminResponse.value = ''
-      showApproveModal.value = true
-    }
-    
+      selectedRequest.value = request;
+      transferQuantity.value = request.requested_quantity;
+      adminResponse.value = "";
+      showApproveModal.value = true;
+    };
+
     const openRejectModal = (request) => {
-      selectedRequest.value = request
-      rejectReason.value = ''
-      showRejectModal.value = true
-    }
-    
+      selectedRequest.value = request;
+      rejectReason.value = "";
+      showRejectModal.value = true;
+    };
+
     const viewDetails = (request) => {
-      selectedRequest.value = request
-      showDetailsModal.value = true
-    }
-    
+      selectedRequest.value = request;
+      showDetailsModal.value = true;
+    };
+
     const approveRequest = async () => {
       if (!transferQuantity.value || transferQuantity.value <= 0) {
-        showToastMessage('Please enter a valid quantity', 'error')
-        return
+        showToastMessage("Please enter a valid quantity", "error");
+        return;
       }
-      
-      submitting.value = true
+
+      submitting.value = true;
       try {
-        const response = await fetch(`/api/admin/stock-requests/${selectedRequest.value.id}/approve`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({
+        const response = await api.put(
+          `/api/admin/stock-requests/${selectedRequest.value.id}/approve`,
+          {
             admin_response: adminResponse.value,
-            transfer_quantity: transferQuantity.value
-          })
-        })
-        
-        if (response.ok) {
-          const result = await response.json()
-          showToastMessage(result.message || 'Stock request approved successfully')
-          closeModals()
-          refreshRequests()
+            transfer_quantity: transferQuantity.value,
+          },
+        );
+
+        if (response.status == 200) {
+          const result = await response.data;
+          showToastMessage(
+            result.message || "Stock request approved successfully",
+          );
+          closeModals();
+          refreshRequests();
         } else {
-          const error = await response.json()
-          showToastMessage(error.detail || 'Failed to approve request', 'error')
+          const error = await response.data;
+          showToastMessage(
+            error.detail || "Failed to approve request",
+            "error",
+          );
         }
       } catch (error) {
-        console.error('Error approving request:', error)
-        showToastMessage('Failed to approve request', 'error')
+        console.error("Error approving request:", error);
+        showToastMessage("Failed to approve request", "error");
       } finally {
-        submitting.value = false
+        submitting.value = false;
       }
-    }
-    
+    };
+
     const rejectRequest = async () => {
       if (!rejectReason.value.trim()) {
-        showToastMessage('Please provide a reason for rejection', 'error')
-        return
+        showToastMessage("Please provide a reason for rejection", "error");
+        return;
       }
-      
-      submitting.value = true
+
+      submitting.value = true;
       try {
-        const response = await fetch(`/api/admin/stock-requests/${selectedRequest.value.id}/reject`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({
-            admin_response: rejectReason.value
-          })
-        })
-        
-        if (response.ok) {
-          const result = await response.json()
-          showToastMessage(result.message || 'Stock request rejected')
-          closeModals()
-          refreshRequests()
+        const response = await api.put(
+          `/api/admin/stock-requests/${selectedRequest.value.id}/reject`,
+          {
+            admin_response: rejectReason.value,
+          },
+        );
+
+        if (response.status == 200) {
+          const result = await response.data;
+          showToastMessage(result.message || "Stock request rejected");
+          closeModals();
+          refreshRequests();
         } else {
-          const error = await response.json()
-          showToastMessage(error.detail || 'Failed to reject request', 'error')
+          const error = await response.data;
+          showToastMessage(error.detail || "Failed to reject request", "error");
         }
       } catch (error) {
-        console.error('Error rejecting request:', error)
-        showToastMessage('Failed to reject request', 'error')
+        console.error("Error rejecting request:", error);
+        showToastMessage("Failed to reject request", "error");
       } finally {
-        submitting.value = false
+        submitting.value = false;
       }
-    }
-    
+    };
+
     const closeModals = () => {
-      showApproveModal.value = false
-      showRejectModal.value = false
-      showDetailsModal.value = false
-      selectedRequest.value = null
-    }
-    
+      showApproveModal.value = false;
+      showRejectModal.value = false;
+      showDetailsModal.value = false;
+      selectedRequest.value = null;
+    };
+
     onMounted(async () => {
-      loading.value = true
-      await Promise.all([fetchRequests(), fetchItemDetails(), fetchAdminInventory()])
-      loading.value = false
-    })
-    
+      loading.value = true;
+      await Promise.all([
+        fetchRequests(),
+        fetchItemDetails(),
+        fetchAdminInventory(),
+      ]);
+      loading.value = false;
+    });
+
     return {
       loading,
       submitting,
@@ -606,10 +713,10 @@ export default {
       viewDetails,
       approveRequest,
       rejectRequest,
-      closeModals
-    }
-  }
-}
+      closeModals,
+    };
+  },
+};
 </script>
 
 <style scoped>
@@ -630,7 +737,7 @@ export default {
 .page-title {
   font-size: 28px;
   font-weight: 700;
-  color: #332F2E;
+  color: #332f2e;
   margin: 0;
 }
 
@@ -663,34 +770,34 @@ export default {
 }
 
 .stat-icon.pending {
-  background: #FFF3E0;
-  color: #F57C00;
+  background: #fff3e0;
+  color: #f57c00;
 }
 
 .stat-icon.approved {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .stat-icon.rejected {
-  background: #FFEBEE;
-  color: #F44336;
+  background: #ffebee;
+  color: #f44336;
 }
 
 .stat-icon.total {
-  background: #E3F2FD;
-  color: #1976D2;
+  background: #e3f2fd;
+  color: #1976d2;
 }
 
 .stat-info h3 {
   font-size: 24px;
   font-weight: 700;
-  color: #332F2E;
+  color: #332f2e;
   margin: 0;
 }
 
 .stat-info p {
-  color: #8C8C90;
+  color: #8c8c90;
   margin: 0;
   font-size: 14px;
 }
@@ -713,20 +820,21 @@ export default {
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #8C8C90;
+  color: #8c8c90;
 }
 
 .search-box input {
   width: 100%;
   padding: 10px 12px 10px 40px;
-  border: 1px solid #E5E5E2;
+  border: 1px solid #e5e5e2;
   border-radius: 8px;
   font-size: 14px;
 }
 
-.filter-select, .date-input {
+.filter-select,
+.date-input {
   padding: 10px 16px;
-  border: 1px solid #E5E5E2;
+  border: 1px solid #e5e5e2;
   border-radius: 8px;
   background: white;
   cursor: pointer;
@@ -747,15 +855,15 @@ export default {
 .requests-table th {
   text-align: left;
   padding: 16px;
-  background: #F9F7EB;
-  color: #332F2E;
+  background: #f9f7eb;
+  color: #332f2e;
   font-weight: 600;
-  border-bottom: 1px solid #E5E5E2;
+  border-bottom: 1px solid #e5e5e2;
 }
 
 .requests-table td {
   padding: 16px;
-  border-bottom: 1px solid #F0F0F0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .item-info {
@@ -777,7 +885,7 @@ export default {
 
 .quantity-cell {
   font-weight: 600;
-  color: #EFCA71;
+  color: #efca71;
 }
 
 .reason-cell {
@@ -795,22 +903,22 @@ export default {
 }
 
 .priority-badge.low {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .priority-badge.medium {
-  background: #FFF3E0;
-  color: #F57C00;
+  background: #fff3e0;
+  color: #f57c00;
 }
 
 .priority-badge.high {
-  background: #FFEBEE;
-  color: #F44336;
+  background: #ffebee;
+  color: #f44336;
 }
 
 .priority-badge.urgent {
-  background: #FF5252;
+  background: #ff5252;
   color: white;
 }
 
@@ -822,18 +930,18 @@ export default {
 }
 
 .status-badge.pending {
-  background: #FFF3E0;
-  color: #F57C00;
+  background: #fff3e0;
+  color: #f57c00;
 }
 
 .status-badge.approved {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .status-badge.rejected {
-  background: #FFEBEE;
-  color: #F44336;
+  background: #ffebee;
+  color: #f44336;
 }
 
 .actions-cell {
@@ -842,7 +950,7 @@ export default {
 }
 
 .btn-approve-sm {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   border: none;
   width: 32px;
@@ -858,7 +966,7 @@ export default {
 }
 
 .btn-reject-sm {
-  background: #F44336;
+  background: #f44336;
   color: white;
   border: none;
   width: 32px;
@@ -877,29 +985,29 @@ export default {
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  border: 1px solid #E5E5E2;
+  border: 1px solid #e5e5e2;
   background: white;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .btn-icon:hover {
-  background: #F9F7EB;
-  border-color: #EFCA71;
+  background: #f9f7eb;
+  border-color: #efca71;
 }
 
 .btn-secondary {
-  background: #F5F5F5;
-  border: 1px solid #E5E5E2;
+  background: #f5f5f5;
+  border: 1px solid #e5e5e2;
   padding: 10px 20px;
   border-radius: 8px;
-  color: #6F6C6D;
+  color: #6f6c6d;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .btn-secondary:hover {
-  background: #E5E5E2;
+  background: #e5e5e2;
 }
 
 .loading-container {
@@ -914,7 +1022,7 @@ export default {
   width: 40px;
   height: 40px;
   border: 3px solid rgba(239, 202, 113, 0.2);
-  border-top-color: #EFCA71;
+  border-top-color: #efca71;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: 16px;
@@ -923,7 +1031,7 @@ export default {
 .empty-state {
   text-align: center;
   padding: 60px !important;
-  color: #8C8C90;
+  color: #8c8c90;
 }
 
 /* Modal Styles */
@@ -955,13 +1063,13 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #E5E5E2;
+  border-bottom: 1px solid #e5e5e2;
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 20px;
-  color: #332F2E;
+  color: #332f2e;
 }
 
 .close-btn {
@@ -969,7 +1077,7 @@ export default {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #8C8C90;
+  color: #8c8c90;
 }
 
 .modal-body {
@@ -981,20 +1089,20 @@ export default {
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #F9F7EB;
+  background: #f9f7eb;
   border-radius: 12px;
   margin-bottom: 20px;
 }
 
 .item-name {
   font-weight: 600;
-  color: #332F2E;
+  color: #332f2e;
   margin-bottom: 4px;
 }
 
 .item-detail {
   font-size: 12px;
-  color: #8C8C90;
+  color: #8c8c90;
 }
 
 .form-group {
@@ -1005,14 +1113,14 @@ export default {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #332F2E;
+  color: #332f2e;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #E5E5E2;
+  border: 1px solid #e5e5e2;
   border-radius: 8px;
   font-size: 14px;
 }
@@ -1023,7 +1131,7 @@ export default {
 
 .form-group small {
   font-size: 12px;
-  color: #8C8C90;
+  color: #8c8c90;
   margin-top: 4px;
   display: block;
 }
@@ -1037,18 +1145,18 @@ export default {
 }
 
 .stock-info.adequate {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .stock-info.low {
-  background: #FFF3E0;
-  color: #F57C00;
+  background: #fff3e0;
+  color: #f57c00;
 }
 
 .stock-info.critical {
-  background: #FFEBEE;
-  color: #F44336;
+  background: #ffebee;
+  color: #f44336;
 }
 
 .modal-actions {
@@ -1059,7 +1167,7 @@ export default {
 }
 
 .btn-approve {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -1074,7 +1182,7 @@ export default {
 }
 
 .btn-reject {
-  background: #F44336;
+  background: #f44336;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -1089,7 +1197,7 @@ export default {
 }
 
 .details-card {
-  background: #F9F7EB;
+  background: #f9f7eb;
   border-radius: 12px;
   padding: 16px;
 }
@@ -1097,7 +1205,7 @@ export default {
 .detail-row {
   display: flex;
   padding: 10px 0;
-  border-bottom: 1px solid #E5E5E2;
+  border-bottom: 1px solid #e5e5e2;
 }
 
 .detail-row:last-child {
@@ -1107,20 +1215,20 @@ export default {
 .detail-row label {
   width: 110px;
   font-weight: 600;
-  color: #332F2E;
+  color: #332f2e;
   font-size: 14px;
 }
 
 .detail-row span,
 .detail-row p {
   flex: 1;
-  color: #6F6C6D;
+  color: #6f6c6d;
   margin: 0;
 }
 
 .quantity-highlight {
   font-weight: 600;
-  color: #EFCA71;
+  color: #efca71;
 }
 
 .toast {
@@ -1138,12 +1246,12 @@ export default {
 }
 
 .toast.success {
-  background: #88B788;
+  background: #88b788;
   color: white;
 }
 
 .toast.error {
-  background: #C45A5A;
+  background: #c45a5a;
   color: white;
 }
 
@@ -1168,23 +1276,24 @@ export default {
   .stock-requests {
     padding: 16px;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .filters {
     flex-direction: column;
   }
-  
+
   .search-box input {
     width: 100%;
   }
-  
-  .filter-select, .date-input {
+
+  .filter-select,
+  .date-input {
     width: 100%;
   }
-  
+
   .modal-content {
     margin: 16px;
   }
